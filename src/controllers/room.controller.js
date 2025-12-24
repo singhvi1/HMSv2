@@ -4,7 +4,7 @@ import logger from "../utils/logger.js";
 
 export const createRoom = async (req, res) => {
     try {
-        const { room_number, block, floor, capacity, yearly_rent } = req.body;
+        const { room_number, block, floor, capacity, yearly_rent=8500 } = req.body;
 
         if (!room_number || !block || floor === undefined) {
             logger.warn("CREATE_ROOM: Validation failed", { body: req.body });

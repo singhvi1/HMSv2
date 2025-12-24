@@ -18,7 +18,6 @@ const roomSchema = new Schema(
 
         floor: {
             type: Number,           // 2
-            required: true,
             min: 0,
         },
 
