@@ -56,7 +56,7 @@ const createLeaveRequest = async (req, res) => {
 
       });
     }
-    console.log("stuent_id", req.user.student)
+    // console.log("stuent_id", req.user.student)
     // Check for overlapping leave requests
     const overlappingLeave = await LeaveRequest.findOne({
       student_id: req.user.student._id,
@@ -127,6 +127,7 @@ const getAllLeaveRequests = async (req, res) => {
         { user_id: student_user_id },
         "_id"
       );
+
       if (student) {
         query.student_id = student._id;
       }
@@ -237,7 +238,7 @@ const updateLeaveRequestStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-
+console.log("update status called")
     // Validation
     if (!status || !["approved", "rejected"].includes(status)) {
       return res.status(400).json({

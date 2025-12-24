@@ -8,6 +8,11 @@ const studentSchema = new Schema(
       required: true,
       index  :true
     },
+    room_id: {
+      type: Schema.Types.ObjectId,
+      ref: "Room",
+      default: null
+    },
     sid:{
       type: String,
       unique: true,
@@ -47,7 +52,7 @@ const studentSchema = new Schema(
       type: String,
       required: true,
       lowercase: true,
-    },
+    },  
     room_out:{
       type: Date,
     }

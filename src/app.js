@@ -12,7 +12,8 @@ import disciplinaryCaseRoutes from "./routes/disciplinary_case.routes.js";
 import { login, logout } from "./controllers/user.controller.js";
 import { auth } from "./middlewares/auth.js";
 import { getAllAnnouncements } from "./controllers/annoucement.controller.js";
-
+import hostelRoutes from "./routes/hostel.routes.js"
+import roomRoutes from "./routes/room.routes.js"
 
 
 const app = express();
@@ -37,6 +38,8 @@ app.post("/api/v1/logout", auth, logout);
 app.get("/api/v1/home", auth, getAllAnnouncements);
 
 // Routes
+app.use("/api/v1/rooms", roomRoutes);
+app.use("/api/v1/hostel", hostelRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/students", studentRoutes);
 app.use("/api/v1/home/announcements", announcementRoutes);

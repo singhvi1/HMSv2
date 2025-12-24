@@ -24,6 +24,8 @@ const userSchema = new Schema(
   },
   { timestamps: true }
 );
+
+
 userSchema.virtual("student", {
   ref: "Student",
   localField: "_id",

@@ -1,9 +1,11 @@
 import app from "./app.js";
 import dbConnect from "./config/dbConnect.js";
-import dotenv from "dotenv";
 import logger from "./utils/logger.js";
 
-dotenv.config();
+// import dotenv from "dotenv";
+// dotenv.config({ debug: false });
+process.env.DOTENV_CONFIG_QUIET = "true";
+import "dotenv/config";
 
 const PORT = process.env.PORT || 8000;
 

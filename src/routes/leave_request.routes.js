@@ -12,7 +12,7 @@ import {
 const router = Router();
 
 // Create leave request
-router.post("/", auth, createLeaveRequest);
+router.post("/new", auth, createLeaveRequest);
 
 // Get all leave requests
 router.get("/", auth, getAllLeaveRequests);
