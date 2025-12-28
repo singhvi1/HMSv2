@@ -4,13 +4,13 @@ import logger from "../utils/logger.js";
 // Create announcement (admin/staff only)
 const createAnnouncement = async (req, res) => {
   try {
-    const { title, message, notice_url } = req.body;
+    const { title, message, notice_url, category } = req.body;
 
     // Validation
-    if (!title || !message) {
+    if (!title || !message || !category) {
       return res.status(400).json({
         success: false,
-        message: "Title and message are required"
+        message: "Title and message with category are required"
       });
     }
 
@@ -27,11 +27,18 @@ const createAnnouncement = async (req, res) => {
         message: "Message must be at least 10 characters long"
       });
     }
+    if (category.trim().length > 10) {
+      return res.status(400).json({
+        success: false,
+        message: "category must be atmmost 10 characters long"
+      });
+    }
 
     const announcement = await Announcement.create({
       title: title.trim(),
       message: message.trim(),
       notice_url: notice_url?.trim(),
+      category: category.trim(),
       created_by: req.user._id
     });
 
@@ -121,7 +128,7 @@ const getAnnouncement = async (req, res) => {
 
   } catch (error) {
     logger.error("GET ANNOUNCEMENT", error);
-    
+
     if (error.name === "CastError") {
       return res.status(400).json({
         success: false,
@@ -140,7 +147,7 @@ const getAnnouncement = async (req, res) => {
 const updateAnnouncement = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, message, notice_url } = req.body;
+    const { title, message, notice_url, category } = req.body;
 
     const announcement = await Announcement.findById(id);
 
@@ -160,7 +167,9 @@ const updateAnnouncement = async (req, res) => {
       }
       announcement.title = title.trim();
     }
-
+    if(category){
+      announcement.category=category;
+    }
     if (message) {
       if (message.trim().length < 10) {
         return res.status(400).json({
@@ -186,7 +195,7 @@ const updateAnnouncement = async (req, res) => {
 
   } catch (error) {
     logger.error("UPDATE ANNOUNCEMENT", error);
-    
+
     if (error.name === "CastError") {
       return res.status(400).json({
         success: false,
@@ -223,7 +232,7 @@ const deleteAnnouncement = async (req, res) => {
 
   } catch (error) {
     logger.error("DELETE ANNOUNCEMENT", error);
-    
+
     if (error.name === "CastError") {
       return res.status(400).json({
         success: false,

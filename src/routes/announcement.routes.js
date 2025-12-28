@@ -8,23 +8,24 @@ import {
   updateAnnouncement,
   deleteAnnouncement
 } from "../controllers/annoucement.controller.js";
+import { upload } from "../middlewares/multer.middleware.js";
 
 const router = Router();
 
 // Create announcement (admin/staff only)
-router.post("/", auth, authorizeRoles("admin", "staff"), createAnnouncement);
+router.post("/", auth, upload.single("file"), authorizeRoles("admin", "staff"), createAnnouncement);
 
 // Get all announcements (all logedin users)
 router.get("/", auth, getAllAnnouncements);
 
 // Get single announcement (all logined users)
-router.get("/:id", auth,getAnnouncement);
+router.get("/:id", auth, getAnnouncement);
 
 // Update announcement (admin/staff or creator)
-router.patch("/:id", auth,authorizeRoles("admin","staff"), updateAnnouncement);
+router.patch("/:id", auth, upload.single("file"), authorizeRoles("admin", "staff"), updateAnnouncement);
 
 // Delete announcement (admin/staff or creator)
-router.delete("/:id", auth,authorizeRoles("admin","staff"), deleteAnnouncement);
+router.delete("/:id", auth, authorizeRoles("admin", "staff"), deleteAnnouncement);
 
 export default router;
 

@@ -1,4 +1,4 @@
-import mongoose, {Schema} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const announcementSchema = new Schema({
   title: {
@@ -8,10 +8,22 @@ const announcementSchema = new Schema({
   notice_url: {
     type: String,
   },
+  image: {
+    type: [String],
+    default: "https://static.vecteezy.com/system/resources/previews/047/627/512/non_2x/document-file-icon-for-office-administration-and-paperwork-management-vector.jpg"
+  },
   message: {
     type: String,
     required: true
   },
+
+  category: {
+    type: String,
+    required: true,
+    lowercase: true,
+    trim: true
+  },
+
   created_by: {
     type: Schema.Types.ObjectId,
     ref: "User",
