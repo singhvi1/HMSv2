@@ -114,10 +114,10 @@ const addUser = async (req, res) => {
     }
 
     // Phone validation
-    if (phone.length >=10 || !/^\d+$/.test(phone)) {
+    if (phone.length >10 || !/^\d+$/.test(phone)) {
       return res.status(400).json({
         success: false,
-        message: "Phone number must be less than equal 12 digits"
+        message: "Phone number must be equal to 10 digits"
       });
     }
 

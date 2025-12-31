@@ -2,7 +2,8 @@ import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 
 export const auth = async (req, res, next) => {
-  console.log("AUTH HIT:", req.method, req.originalUrl);
+  console.log("AUTH HIT:", req.method, req.originalUrl,
+    new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }));
   try {
     const token = req.cookies?.accessToken ||
       req.header("Authorization")?.replace("Bearer ", "");

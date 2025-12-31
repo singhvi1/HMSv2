@@ -19,9 +19,9 @@ router.post("/", auth, upload.single("file"), authorizeRoles("admin", "staff"), 
 router.post("/create", auth, upload.single("file"), authorizeRoles("admin", "staff"), createUserStudent);
 
 router.get("/getall", auth, authorizeRoles("admin", "staff"), getAllStudents);
-
+//for student
 router.get("/profile", auth, getStudentProfile);
-
+//for admin
 router.get("/profile/:user_id", auth, authorizeRoles("admin", "staff"), getStudentProfile);
 
 // Update student profile by student(not all) and Admin/staff(all info)

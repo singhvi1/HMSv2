@@ -344,22 +344,24 @@ const getStudentProfile = async (req, res) => {
     });
   }
 };
-
-// Get all students (admin/staff only)
+//NOTE this is not optimised i need to learn aggregate Pipeline;
 const getAllStudents = async (req, res) => {
   try {
-    const { page = 1, limit = 10, block, branch, search } = req.query;
+    const { page = 1, limit = 10, block, branch, search, status } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // Build query
     const query = {};
     if (block) query.block = block.toLowerCase();
     if (branch) query.branch = new RegExp(branch, "i");
+    if (status) query.status = new RegExp(status, "i");
 
     // Search by name, email, or SID (optimized - single aggregation query)
     if (search) {
       // First, get matching students by SID
-      const sidMatches = await Student.find({ sid: new RegExp(search, "i") }).select("user_id");
+      const sidMatches = await Student.find({ sid: new RegExp(search, "i") })
+        .populate("")
+        .select("user_id");
       const sidUserIds = sidMatches.map(s => s.user_id);
 
       // Then get matching users by name/email
