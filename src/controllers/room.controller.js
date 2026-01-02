@@ -70,18 +70,10 @@ export const getAllRooms = async (req, res) => {
       .populate({
         path: "occupants",
         select: "sid permanent_address guardian_name guardian_contact leaving_date branch",
-        populate: ({
-          path: "raised_by",
-          select: "sid branch guardian_contact guardian_name permanent_address",
-          populate: [
-            {
-              path: "user_id",
-              select: "full_name email phone role status"
-            }, {
-              path: "room_id",
-              select: "room_number block"
-            }]
-        })
+        populate: {
+          path: "user_id",
+          select: "full_name email phone role status"
+        }
       })
       .sort({ block: 1, room_number: 1 })
 

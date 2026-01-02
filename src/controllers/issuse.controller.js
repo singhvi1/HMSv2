@@ -1,5 +1,6 @@
 import Issue from "../models/issue.model.js";
 import Student from "../models/student_profile.model.js";
+import User from "../models/user.model.js";
 import logger from "../utils/logger.js";
 
 const createIssue = async (req, res) => {
@@ -116,8 +117,8 @@ const getAllIssues = async (req, res) => {
   try {
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.min(parseInt(req.query.limit) || 10, 100);
-    const { status, category, search } = req.query;
 
+    const { status, category, search, student_search, sid, block, room_number } = req.query;
     const skip = (page - 1) * limit;
     const query = {};
 
@@ -132,24 +133,70 @@ const getAllIssues = async (req, res) => {
       }
 
       query.raised_by = student._id;
+
+    }
+    else if (req.user.role === "admin" || req.user.role === "staff") {
+
+      if (sid || block || room_number || student_search) {
+
+        const studentQuery = {};
+
+        if (sid?.trim()) {
+          studentQuery.sid = new RegExp(`^${sid.trim()}`, "i");
+        }
+
+        if (block) {
+          studentQuery.block = block.trim().toLowerCase();
+        }
+        if (room_number) {
+          studentQuery.room_number = new RegExp(`^${room_number.trim()}`, "i")
+        }
+        if (student_search?.trim()) {
+          const users = await User.find({
+            $or: [
+              { full_name: new RegExp(student_search, "i") },
+              { email: new RegExp(student_search, "i") }
+            ]
+          }).select("_id");
+
+          studentQuery.user_id = { $in: users.map(u => u._id) };
+        }
+
+        console.log("STUDENT QUERY →", studentQuery);
+
+        const students = await Student.find(studentQuery).select("_id");
+        console.log(studentQuery)
+        console.log(students)
+        query.raised_by = { $in: students.map(s => s._id) };
+      }
+    } else {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden "
+      });
     }
 
-    if (status && ["pending", "resolved"].includes(status)) {
+
+
+    if (status && ["pending", "in_progress", "resolved"].includes(status)) {
       query.status = status;
     }
 
     if (
       category &&
-      ["drinking-water", "plumbing", "furniture", "electricity", "other"].includes(category)
+      ["drinking-water", "plumbing", "internet", "furniture", "carpentry", "electricity", "other"].includes(category)
     ) {
       query.category = category;
     }
 
+
     if (search) {
       const regex = new RegExp(search, "i");
-      query.$or = [{ title: regex }, { description: regex }];
+      query.$and = [
+        ...(query.$and || []),
+        { $or: [{ title: regex }, { description: regex }] }
+      ];
     }
-
     const issues = await Issue.find(query)
       .populate({
         path: "raised_by",
@@ -169,6 +216,8 @@ const getAllIssues = async (req, res) => {
       .lean();
 
     const total = await Issue.countDocuments(query);
+    console.log("ISSUES QUERY-beckend →", query);
+    console.log(total)
 
     return res.status(200).json({
       success: true,
@@ -181,7 +230,6 @@ const getAllIssues = async (req, res) => {
       },
       message: "Issues fetched successfully"
     });
-
   } catch (error) {
     logger.error("GET ALL ISSUES", error);
     return res.status(500).json({

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Schema, model } from "mongoose";
+import Room from "./room.model.js";
 
 const studentSchema = new Schema(
   {
@@ -8,7 +9,6 @@ const studentSchema = new Schema(
       ref: "User",
       index: true,
       required: true,
-      index: true
     },
     room_id: {
       type: Schema.Types.ObjectId,
@@ -37,6 +37,16 @@ const studentSchema = new Schema(
       minLength: 10,
       maxLength: 10,
     },
+    block: {
+      type: String,
+      index: true,
+      lowercase: true,
+    },
+    room_number: {
+      type: String,
+      index: true
+    },
+
     leaving_date: {
       type: Date,
       default: null
@@ -55,9 +65,17 @@ const studentSchema = new Schema(
   }
 );
 
-studentSchema.index({
-  branch: 1, status: 1, createdAt: -1
+studentSchema.index({ branch: 1, createdAt: -1 });
+
+studentSchema.pre("save", async function () {
+  const roomDetail = this
+  if (roomDetail.isModified("room_id")) {
+    const room = await Room.findById(this?.room_id);
+    this.block = room.block;
+    this.room_number = room.room_number;
+  }
 });
+
 
 const Student = model("Student", studentSchema);
 export default Student;

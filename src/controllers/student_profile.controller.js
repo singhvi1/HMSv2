@@ -331,36 +331,47 @@ const getAllStudents = async (req, res) => {
   try {
     const { page = 1, limit = 10, block, branch, search, status } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
-
+    //search : name sid block room_number    block branch status 
     // Build query
     const query = {};
     if (block) query.block = block.toLowerCase();
     if (branch) query.branch = new RegExp(branch, "i");
-    if (status) query.status = new RegExp(status, "i");
+    let filteredUserIds = null;
 
     if (search) {
-      const sidMatches = await Student.find({ sid: new RegExp(search, "i") })
-        .populate("")
+      const regex = new RegExp(search, "i");
+      const students = await Student.find({ $or: [{ sid: regex }, { room_number: regex }, { block: regex }] })
         .select("user_id");
-      const sidUserIds = sidMatches.map(s => s.user_id);
+      const studentList = students.map(s => s.user_id.toString());
 
       // Then get matching users by name/email
       const userMatches = await User.find({
         $or: [
-          { full_name: new RegExp(search, "i") },
-          { email: new RegExp(search, "i") }
+          { full_name: new RegExp(search, "i") }
         ],
         role: "student"
       }).select("_id");
 
-      const userIds = userMatches.map(u => u._id);
+      const userIds = userMatches.map(u => u._id.toString());
 
       // Combine both results
-      const allUserIds = [...new Set([...userIds, ...sidUserIds].map(id => id.toString()))];
-      query.user_id = { $in: allUserIds };
+      filteredUserIds = new Set([...userIds, ...studentList]);
+
+    }
+    if (status) {
+      const userStatusList = await User.find({ status: new RegExp(status, "i"), role: "student" }).select("_id");
+      const statusIds = userStatusList.map(u => u._id.toString());
+
+
+      filteredUserIds = filteredUserIds ? new Set([filteredUserIds.filter(id => statusIds.includes(id))])
+        : new Set([...statusIds]);
+    }
+    if (filteredUserIds) {
+      query.user_id = { $in: [...filteredUserIds] };
     }
 
     // Optimized: Get students with populated user data in single query
+
     const students = await Student.find(query)
       .populate([
         { path: "user_id", select: "full_name email phone role status" },
